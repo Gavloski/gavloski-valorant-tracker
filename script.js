@@ -1,4 +1,5 @@
-const PLAYER={name:"GAVLOSKI",tag:"片想い",region:"br"};
+const HOME_PLAYER={name:"GAVLOSKI",tag:"片想い",region:"br"};
+let PLAYER={...HOME_PLAYER};
 const API="https://api.henrikdev.xyz/valorant";
 const $=id=>document.getElementById(id);
 const safe=n=>Number.isFinite(n)?n:0;
@@ -73,6 +74,41 @@ function renderMatches(matches){
   else if(wr<.5){$("focusTitle").textContent="Converta vantagem em rounds";$("focusText").textContent="Os números individuais não parecem ser o maior limite. Foque comunicação curta, disciplina no pós-plant e decisões com vantagem numérica."}
   else{$("focusTitle").textContent="Mantenha a consistência";$("focusText").textContent="A sequência recente está positiva. Preserve a rotina, limite sessões após duas derrotas seguidas e repita as decisões que geram vantagem."}
 }
+function updatePlayerHeader(){
+  $("playerName").textContent=PLAYER.name;
+  $("playerTag").textContent="#"+PLAYER.tag;
+  const regions={br:"Brasil",na:"América do Norte",latam:"América Latina",eu:"Europa",ap:"Ásia-Pacífico",kr:"Coreia"};
+  $("playerRegion").textContent=regions[PLAYER.region]||PLAYER.region.toUpperCase();
+  $("riotIdInput").value=PLAYER.name+"#"+PLAYER.tag;
+}
+function resetDashboard(){
+  ["kd","acs","hs","winRate"].forEach(id=>$(id).textContent="—");
+  $("rankName").textContent="Consultando...";
+  $("rankInitial").textContent="—";$("rrValue").textContent="— RR";$("rrBar").style.width="0";
+  $("matches").innerHTML='<div class="loading-row"></div><div class="loading-row"></div><div class="loading-row"></div>';
+}
+async function searchPlayer(event){
+  event?.preventDefault();
+  const value=$("riotIdInput").value.trim();
+  const split=value.lastIndexOf("#");
+  if(split<1||split===value.length-1){
+    $("notice").textContent="Digite a Riot ID completa no formato Nome#TAG.";
+    $("notice").classList.remove("hidden");return;
+  }
+  const key=getApiKey();if(!key){openApiModal();return}
+  const button=$("playerSearchForm").querySelector("button");
+  button.disabled=true;button.textContent="Buscando...";
+  try{
+    const name=value.slice(0,split).trim(),tag=value.slice(split+1).trim();
+    const account=await getJSON(`/v2/account/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`,key);
+    PLAYER={name:account.name||name,tag:account.tag||tag,region:account.region||"br"};
+    updatePlayerHeader();resetDashboard();await load();
+  }catch(err){
+    $("notice").textContent=err.message==="API_KEY_INVALIDA"?"A chave da API é inválida ou expirou.":"Jogador não encontrado. Confira exatamente o Nome#TAG.";
+    $("notice").classList.remove("hidden");
+    if(err.message==="API_KEY_INVALIDA")openApiModal();
+  }finally{button.disabled=false;button.textContent="Consultar"}
+}
 async function load(){
   $("refreshButton").disabled=true;$("notice").classList.add("hidden");$("syncLabel").textContent="ATUALIZANDO";
   try{
@@ -98,6 +134,9 @@ async function load(){
   }finally{$("refreshButton").disabled=false}
 }
 $("refreshButton").addEventListener("click",load);
+$("playerSearchForm").addEventListener("submit",searchPlayer);
+$("myProfileButton").addEventListener("click",()=>{PLAYER={...HOME_PLAYER};updatePlayerHeader();resetDashboard();load()});
+updatePlayerHeader();
 $("apiSettingsButton").addEventListener("click",openApiModal);
 $("closeApiModal").addEventListener("click",closeApiModal);
 $("saveApiKey").addEventListener("click",saveApiKey);
