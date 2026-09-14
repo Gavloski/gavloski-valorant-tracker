@@ -3,8 +3,20 @@ const API="https://api.henrikdev.xyz/valorant";
 const $=id=>document.getElementById(id);
 const safe=n=>Number.isFinite(n)?n:0;
 
-async function getJSON(path){
-  const res=await fetch(API+path,{headers:{Accept:"application/json"}});
+function getApiKey(){
+  let key=localStorage.getItem("henrik_api_key");
+  if(!key){
+    key=window.prompt("A HenrikDev exige uma chave gratuita. Cole sua API Key aqui (ela ficará salva somente neste navegador):");
+    if(key?.trim()) localStorage.setItem("henrik_api_key",key.trim());
+  }
+  return key?.trim()||"";
+}
+async function getJSON(path,key){
+  const res=await fetch(API+path,{headers:{Accept:"application/json",Authorization:"Bearer "+key}});
+  if(res.status===401||res.status===403){
+    localStorage.removeItem("henrik_api_key");
+    throw new Error("API_KEY_INVALIDA");
+  }
   if(!res.ok) throw new Error(res.status===429?"Limite temporário da API atingido. Aguarde alguns minutos.":"A API respondeu com erro "+res.status+".");
   const json=await res.json();
   if(json.status && json.status!==200) throw new Error(json.errors?.[0]?.message||"Não foi possível obter os dados.");
@@ -54,15 +66,23 @@ function renderMatches(matches){
 async function load(){
   $("refreshButton").disabled=true;$("notice").classList.add("hidden");$("syncLabel").textContent="ATUALIZANDO";
   try{
+    const key=getApiKey();
+    if(!key) throw new Error("CHAVE_NAO_INFORMADA");
     const [mmr,matches]=await Promise.all([
-      getJSON(`/v2/mmr/${PLAYER.region}/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}`),
-      getJSON(`/v3/matches/${PLAYER.region}/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}?mode=competitive&size=10`)
+      getJSON(`/v2/mmr/${PLAYER.region}/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}`,key),
+      getJSON(`/v3/matches/${PLAYER.region}/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}?mode=competitive&size=10`,key)
     ]);
     renderRank(mmr);renderMatches(Array.isArray(matches)?matches:[]);
     $("syncLabel").textContent="DADOS ATUALIZADOS";$("rankChange").textContent=new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
   }catch(err){
-    $("notice").textContent=err.message+" O perfil precisa estar público e a Riot ID deve ser Gavloski#Белла.";
-    $("notice").classList.remove("hidden");$("syncLabel").textContent="FALHA NA ATUALIZAÇÃO";
+    if(err.message==="API_KEY_INVALIDA"){
+      $("notice").textContent="A chave da API é inválida ou expirou. Clique em “Atualizar dados” e cole uma chave válida.";
+    }else if(err.message==="CHAVE_NAO_INFORMADA"){
+      $("notice").textContent="É necessário informar uma chave gratuita da HenrikDev. Clique em “Atualizar dados” para inserir.";
+    }else{
+      $("notice").textContent=err.message+" Confirme também que a Riot ID é Gavloski#Белла.";
+    }
+    $("notice").classList.remove("hidden");$("syncLabel").textContent="CONFIGURAÇÃO NECESSÁRIA";
     $("matches").innerHTML='<p class="subtitle">Clique em “Atualizar dados” para tentar novamente.</p>';
   }finally{$("refreshButton").disabled=false}
 }
