@@ -3,65 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b0c12">
-  <meta name="description" content="Painel pessoal de desempenho no Valorant de Gavloski.">
-  <title>Gavloski // Valorant Tracker</title>
+  <meta name="theme-color" content="#08090d">
+  <meta name="description" content="Painel pessoal de desempenho no Valorant de GAVLOSKI.">
+  <title>GAVLOSKI // Valorant Tracker</title>
   <link rel="preconnect" href="https://api.henrikdev.xyz">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="grid-bg"></div><div class="glow glow-red"></div><div class="glow glow-purple"></div>
   <header class="topbar">
     <a class="brand" href="#"><span class="brand-mark">G</span><span>GAVLOSKI<span class="red">.GG</span></span></a>
+    <nav><a href="#overview">Visão geral</a><a href="#matchesCard">Partidas</a><a href="#focusCard">Análise</a></nav>
     <div class="header-actions">
-      <button id="apiSettingsButton" class="api-settings" type="button">⚙ Chave da API</button>
-      <div class="live"><i></i><span id="syncLabel">CARREGANDO DADOS</span></div>
+      <button id="apiSettingsButton" class="api-settings" type="button"><span>⚙</span> API</button>
+      <div class="live"><i></i><span id="syncLabel">CARREGANDO</span></div>
     </div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div>
-        <p class="eyebrow">PAINEL COMPETITIVO PESSOAL</p>
-        <h1>GAVLOSKI <span>#片想い</span></h1>
-        <p class="subtitle">Acompanhe sua evolução, encontre padrões e mantenha o foco até o Radiante.</p>
+  <main id="overview">
+    <section class="profile-hero panel">
+      <div class="profile-pattern"></div>
+      <div class="avatar-wrap">
+        <button id="avatarButton" class="avatar" type="button" aria-label="Escolher foto de perfil">
+          <img id="profileImage" class="hidden" alt="Foto de perfil de GAVLOSKI">
+          <span id="avatarFallback">G</span><b>＋</b>
+        </button>
+        <input id="profilePhotoInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
       </div>
-      <button id="refreshButton" class="refresh" type="button"><span>↻</span> Atualizar dados</button>
+      <div class="identity">
+        <p class="eyebrow">PERFIL COMPETITIVO</p>
+        <h1>GAVLOSKI <span>#片想い</span></h1>
+        <p>Brasil <i></i> PC <i></i> Solo Queue</p>
+        <div class="profile-actions">
+          <button id="changePhotoButton" class="ghost-button" type="button">Alterar foto</button>
+          <button id="removePhotoButton" class="text-button hidden" type="button">Remover</button>
+        </div>
+      </div>
+      <div class="hero-goal"><small>OBJETIVO ATUAL</small><strong>RADIANTE</strong><span>Evolução consistente, sem sobrecarga</span></div>
     </section>
 
     <section id="notice" class="notice hidden" aria-live="polite"></section>
 
-    <section class="rank-panel panel">
-      <div class="rank-emblem"><span id="rankInitial">—</span></div>
-      <div class="rank-info">
-        <p>RANK ATUAL</p>
-        <h2 id="rankName">Consultando...</h2>
-        <div class="rr-row"><strong id="rrValue">— RR</strong><span id="rankChange">Última atualização</span></div>
-        <div class="progress"><div id="rrBar"></div></div>
-      </div>
-      <div class="goal">
-        <span>META</span><strong>RADIANTE</strong><small>Solo queue • evolução sustentável</small>
-      </div>
+    <section class="dashboard-head">
+      <div><p class="eyebrow">TEMPORADA ATUAL</p><h2>Visão geral</h2></div>
+      <button id="refreshButton" class="refresh" type="button"><span>↻</span> Atualizar dados</button>
+    </section>
+
+    <section class="overview-grid">
+      <article class="rank-card panel">
+        <div class="card-label"><span>RANK ATUAL</span><em id="rankChange">Atualizando...</em></div>
+        <div class="rank-content">
+          <div class="rank-emblem"><span id="rankInitial">—</span></div>
+          <div class="rank-info">
+            <h3 id="rankName">Consultando...</h3>
+            <div class="rr-value"><strong id="rrValue">— RR</strong><span>/ 100 RR</span></div>
+            <div class="progress"><div id="rrBar"></div></div>
+            <small>Progresso para o próximo elo</small>
+          </div>
+        </div>
+      </article>
+      <article class="quick-focus panel">
+        <div class="card-label"><span>SESSÃO RECOMENDADA</span><em>ROTINA LEVE</em></div>
+        <strong>30 <small>MIN</small></strong>
+        <div class="segments"><i></i><i></i><i></i></div>
+        <p>10 min mira <span>•</span> 5 min aquecimento <span>•</span> 15 min revisão</p>
+      </article>
     </section>
 
     <section class="stats-grid">
-      <article class="stat panel"><span>K/D</span><strong id="kd">—</strong><small id="kills">— eliminações</small></article>
-      <article class="stat panel"><span>ACS MÉDIO</span><strong id="acs">—</strong><small>pontuação de combate</small></article>
-      <article class="stat panel"><span>HEADSHOT</span><strong id="hs">—</strong><small id="headshots">— headshots</small></article>
-      <article class="stat panel"><span>WIN RATE</span><strong id="winRate">—</strong><small id="record">— partidas</small></article>
+      <article class="stat panel"><div class="stat-icon">K</div><div><span>K/D RATIO</span><strong id="kd">—</strong><small id="kills">— eliminações</small></div></article>
+      <article class="stat panel"><div class="stat-icon">A</div><div><span>ACS MÉDIO</span><strong id="acs">—</strong><small>pontuação de combate</small></div></article>
+      <article class="stat panel"><div class="stat-icon">◎</div><div><span>HEADSHOT</span><strong id="hs">—</strong><small id="headshots">— headshots</small></div></article>
+      <article class="stat panel"><div class="stat-icon">W</div><div><span>WIN RATE</span><strong id="winRate">—</strong><small id="record">— partidas</small></div></article>
     </section>
 
     <section class="content-grid">
-      <article class="panel matches-card">
-        <div class="section-title"><div><p>DESEMPENHO RECENTE</p><h3>Últimas partidas</h3></div><span id="matchCount">0 jogos</span></div>
+      <article id="matchesCard" class="panel matches-card">
+        <div class="section-title"><div><p>HISTÓRICO COMPETITIVO</p><h3>Últimas partidas</h3></div><span id="matchCount">0 jogos</span></div>
+        <div class="match-table-head"><span>AGENTE / MAPA</span><span>PLACAR</span><span>RESULTADO</span></div>
         <div id="matches" class="matches"><div class="loading-row"></div><div class="loading-row"></div><div class="loading-row"></div></div>
       </article>
-      <aside class="panel focus-card">
-        <div class="section-title"><div><p>ANÁLISE RÁPIDA</p><h3>Foco recomendado</h3></div></div>
-        <div class="focus-icon">◎</div>
+      <aside id="focusCard" class="panel focus-card">
+        <div class="section-title"><div><p>INSIGHT DOS DADOS</p><h3>Foco recomendado</h3></div><span class="pulse-dot"></span></div>
+        <div class="focus-visual"><span>◎</span><i></i><i></i></div>
         <h4 id="focusTitle">Analisando partidas...</h4>
         <p id="focusText">Assim que os dados chegarem, o painel indicará um ponto objetivo para seu próximo bloco de ranked.</p>
-        <div class="routine"><span>ROTINA LEVE</span><strong>30 min por dia</strong><small>Mecânica • decisões • consistência</small></div>
+        <div class="tip"><b>DICA</b><span>Interrompa a sessão depois de duas derrotas seguidas.</span></div>
       </aside>
     </section>
   </main>
@@ -69,21 +96,17 @@
   <div id="apiModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="apiTitle">
     <div class="modal-card">
       <button id="closeApiModal" class="modal-close" type="button" aria-label="Fechar">×</button>
-      <p class="eyebrow">CONFIGURAÇÃO</p>
-      <h2 id="apiTitle">Conectar HenrikDev</h2>
+      <p class="eyebrow">CONFIGURAÇÃO</p><h2 id="apiTitle">Conectar HenrikDev</h2>
       <p>Cole sua API Key abaixo. Ela será guardada somente neste navegador e não será enviada ao GitHub.</p>
-      <label for="apiKeyInput">API Key</label>
-      <div class="key-field">
-        <input id="apiKeyInput" type="password" autocomplete="off" placeholder="HDEV-••••••••••••">
-        <button id="toggleApiKey" type="button">Mostrar</button>
-      </div>
+      <label for="apiKeyInput">API KEY</label>
+      <div class="key-field"><input id="apiKeyInput" type="password" autocomplete="off" placeholder="HDEV-••••••••••••"><button id="toggleApiKey" type="button">Mostrar</button></div>
       <div id="keyError" class="key-error hidden">Informe uma chave válida iniciada por HDEV-.</div>
       <button id="saveApiKey" class="save-key" type="button">Salvar e carregar dados</button>
       <a href="https://api.henrikdev.xyz/dashboard/" target="_blank" rel="noopener noreferrer">Gerar uma chave gratuita ↗</a>
     </div>
   </div>
 
-  <footer><span>Dados fornecidos por HenrikDev API</span><span>Feito para Gavloski • não afiliado à Riot Games</span></footer>
+  <footer><span>© 2026 GAVLOSKI.GG</span><span>Dados: HenrikDev API</span><span>Não afiliado à Riot Games</span></footer>
   <script src="script.js"></script>
 </body>
 </html>
