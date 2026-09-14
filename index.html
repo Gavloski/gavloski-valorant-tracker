@@ -25,15 +25,15 @@
       <div class="profile-pattern"></div>
       <div class="avatar-wrap">
         <button id="avatarButton" class="avatar" type="button" aria-label="Escolher foto de perfil">
-          <img id="profileImage" class="hidden" alt="Foto de perfil de GAVLOSKI">
+          <img id="profileImage" class="hidden" alt="Foto de perfil do jogador">
           <span id="avatarFallback">G</span><b>＋</b>
         </button>
         <input id="profilePhotoInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
       </div>
       <div class="identity">
         <p class="eyebrow">PERFIL COMPETITIVO</p>
-        <h1>GAVLOSKI <span>#片想い</span></h1>
-        <p>Brasil <i></i> PC <i></i> Solo Queue</p>
+        <h1><span id="playerName" class="player-name">GAVLOSKI</span> <span id="playerTag">#片想い</span></h1>
+        <p><span id="playerRegion">Brasil</span> <i></i> PC <i></i> Competitivo</p>
         <div class="profile-actions">
           <button id="changePhotoButton" class="ghost-button" type="button">Alterar foto</button>
           <button id="removePhotoButton" class="text-button hidden" type="button">Remover</button>
@@ -41,6 +41,16 @@
       </div>
       <div class="hero-goal"><small>OBJETIVO ATUAL</small><strong>RADIANTE</strong><span>Evolução consistente, sem sobrecarga</span></div>
     </section>
+
+    <section class="player-search panel" aria-label="Consultar Riot ID">
+      <div class="search-copy"><span>⌕</span><div><strong>Consultar jogador</strong><small>Pesquise uma Riot ID completa</small></div></div>
+      <form id="playerSearchForm">
+        <input id="riotIdInput" type="text" maxlength="40" autocomplete="off" placeholder="Nome#TAG" aria-label="Riot ID">
+        <button type="submit">Consultar</button>
+      </form>
+      <button id="myProfileButton" class="my-profile" type="button">Meu perfil</button>
+    </section>
+    <p class="consent-note">Consulte apenas perfis cujos titulares autorizaram o uso dos dados.</p>
 
     <section id="notice" class="notice hidden" aria-live="polite"></section>
 
