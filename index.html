@@ -13,7 +13,10 @@
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <header class="topbar">
     <a class="brand" href="#"><span class="brand-mark">G</span><span>GAVLOSKI<span class="red">.GG</span></span></a>
-    <div class="live"><i></i><span id="syncLabel">CARREGANDO DADOS</span></div>
+    <div class="header-actions">
+      <button id="apiSettingsButton" class="api-settings" type="button">⚙ Chave da API</button>
+      <div class="live"><i></i><span id="syncLabel">CARREGANDO DADOS</span></div>
+    </div>
   </header>
 
   <main>
@@ -62,6 +65,23 @@
       </aside>
     </section>
   </main>
+
+  <div id="apiModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="apiTitle">
+    <div class="modal-card">
+      <button id="closeApiModal" class="modal-close" type="button" aria-label="Fechar">×</button>
+      <p class="eyebrow">CONFIGURAÇÃO</p>
+      <h2 id="apiTitle">Conectar HenrikDev</h2>
+      <p>Cole sua API Key abaixo. Ela será guardada somente neste navegador e não será enviada ao GitHub.</p>
+      <label for="apiKeyInput">API Key</label>
+      <div class="key-field">
+        <input id="apiKeyInput" type="password" autocomplete="off" placeholder="HDEV-••••••••••••">
+        <button id="toggleApiKey" type="button">Mostrar</button>
+      </div>
+      <div id="keyError" class="key-error hidden">Informe uma chave válida iniciada por HDEV-.</div>
+      <button id="saveApiKey" class="save-key" type="button">Salvar e carregar dados</button>
+      <a href="https://api.henrikdev.xyz/dashboard/" target="_blank" rel="noopener noreferrer">Gerar uma chave gratuita ↗</a>
+    </div>
+  </div>
 
   <footer><span>Dados fornecidos por HenrikDev API</span><span>Feito para Gavloski • não afiliado à Riot Games</span></footer>
   <script src="script.js"></script>
