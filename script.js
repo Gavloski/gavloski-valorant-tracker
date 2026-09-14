@@ -108,3 +108,32 @@ $("toggleApiKey").addEventListener("click",()=>{
   $("toggleApiKey").textContent=show?"Ocultar":"Mostrar";
 });
 load();
+const PHOTO_KEY="gavloski_profile_photo";
+function applyProfilePhoto(){
+  const photo=localStorage.getItem(PHOTO_KEY);
+  if(photo){
+    $("profileImage").src=photo;
+    $("profileImage").classList.remove("hidden");
+    $("avatarFallback").classList.add("hidden");
+    $("removePhotoButton").classList.remove("hidden");
+  }else{
+    $("profileImage").removeAttribute("src");
+    $("profileImage").classList.add("hidden");
+    $("avatarFallback").classList.remove("hidden");
+    $("removePhotoButton").classList.add("hidden");
+  }
+}
+function chooseProfilePhoto(){$("profilePhotoInput").click()}
+$("avatarButton").addEventListener("click",chooseProfilePhoto);
+$("changePhotoButton").addEventListener("click",chooseProfilePhoto);
+$("removePhotoButton").addEventListener("click",()=>{localStorage.removeItem(PHOTO_KEY);applyProfilePhoto()});
+$("profilePhotoInput").addEventListener("change",event=>{
+  const file=event.target.files?.[0];
+  if(!file)return;
+  if(file.size>3*1024*1024){alert("Escolha uma imagem com até 3 MB.");event.target.value="";return}
+  const reader=new FileReader();
+  reader.onload=()=>{localStorage.setItem(PHOTO_KEY,reader.result);applyProfilePhoto()};
+  reader.readAsDataURL(file);
+  event.target.value="";
+});
+applyProfilePhoto();
