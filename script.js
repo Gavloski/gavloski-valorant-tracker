@@ -3,13 +3,23 @@ const API="https://api.henrikdev.xyz/valorant";
 const $=id=>document.getElementById(id);
 const safe=n=>Number.isFinite(n)?n:0;
 
-function getApiKey(){
-  let key=localStorage.getItem("henrik_api_key");
-  if(!key){
-    key=window.prompt("A HenrikDev exige uma chave gratuita. Cole sua API Key aqui (ela ficará salva somente neste navegador):");
-    if(key?.trim()) localStorage.setItem("henrik_api_key",key.trim());
+function getApiKey(){return localStorage.getItem("henrik_api_key")?.trim()||""}
+function openApiModal(){
+  $("apiKeyInput").value=getApiKey();
+  $("keyError").classList.add("hidden");
+  $("apiModal").classList.remove("hidden");
+  setTimeout(()=>$("apiKeyInput").focus(),50);
+}
+function closeApiModal(){if(getApiKey()) $("apiModal").classList.add("hidden")}
+function saveApiKey(){
+  const key=$("apiKeyInput").value.trim();
+  if(!key.startsWith("HDEV-")){
+    $("keyError").classList.remove("hidden");
+    return;
   }
-  return key?.trim()||"";
+  localStorage.setItem("henrik_api_key",key);
+  $("apiModal").classList.add("hidden");
+  load();
 }
 async function getJSON(path,key){
   const res=await fetch(API+path,{headers:{Accept:"application/json",Authorization:key}});
@@ -67,7 +77,7 @@ async function load(){
   $("refreshButton").disabled=true;$("notice").classList.add("hidden");$("syncLabel").textContent="ATUALIZANDO";
   try{
     const key=getApiKey();
-    if(!key) throw new Error("CHAVE_NAO_INFORMADA");
+    if(!key){openApiModal();throw new Error("CHAVE_NAO_INFORMADA")}
     const [mmr,matches]=await Promise.all([
       getJSON(`/v2/mmr/${PLAYER.region}/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}`,key),
       getJSON(`/v3/matches/${PLAYER.region}/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}?mode=competitive&size=10`,key)
@@ -76,7 +86,8 @@ async function load(){
     $("syncLabel").textContent="DADOS ATUALIZADOS";$("rankChange").textContent=new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
   }catch(err){
     if(err.message==="API_KEY_INVALIDA"){
-      $("notice").textContent="A chave da API é inválida ou expirou. Clique em “Atualizar dados” e cole uma chave válida.";
+      $("notice").textContent="A chave da API é inválida ou expirou. Abra “Chave da API” e informe uma nova.";
+      openApiModal();
     }else if(err.message==="CHAVE_NAO_INFORMADA"){
       $("notice").textContent="É necessário informar uma chave gratuita da HenrikDev. Clique em “Atualizar dados” para inserir.";
     }else{
@@ -86,4 +97,14 @@ async function load(){
     $("matches").innerHTML='<p class="subtitle">Clique em “Atualizar dados” para tentar novamente.</p>';
   }finally{$("refreshButton").disabled=false}
 }
-$("refreshButton").addEventListener("click",load);load();
+$("refreshButton").addEventListener("click",load);
+$("apiSettingsButton").addEventListener("click",openApiModal);
+$("closeApiModal").addEventListener("click",closeApiModal);
+$("saveApiKey").addEventListener("click",saveApiKey);
+$("apiKeyInput").addEventListener("keydown",e=>{if(e.key==="Enter")saveApiKey()});
+$("toggleApiKey").addEventListener("click",()=>{
+  const input=$("apiKeyInput"),show=input.type==="password";
+  input.type=show?"text":"password";
+  $("toggleApiKey").textContent=show?"Ocultar":"Mostrar";
+});
+load();
