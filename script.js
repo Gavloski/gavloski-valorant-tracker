@@ -36,9 +36,9 @@ function findMe(match){
   return match.players?.all_players?.find(p=>p.name?.toLowerCase()===PLAYER.name.toLowerCase()&&p.tag===PLAYER.tag);
 }
 function renderRank(mmr){
-  const current=mmr?.current_data||mmr;
-  const tier=current?.currenttierpatched||current?.current_tier?.patched||"Não classificado";
-  const rr=safe(current?.ranking_in_tier??current?.rr);
+  const current=mmr?.current||mmr?.current_data||mmr;
+  const tier=current?.tier?.name||current?.currenttierpatched||current?.current_tier?.patched||"Não classificado";
+  const rr=safe(current?.rr??current?.ranking_in_tier);
   $("rankName").textContent=tier;
   $("rankInitial").textContent=tier==="Não classificado"?"—":tier.split(" ").map(x=>x[0]).join("");
   $("rrValue").textContent=rr+" RR";
@@ -79,7 +79,7 @@ async function load(){
     const key=getApiKey();
     if(!key){openApiModal();throw new Error("CHAVE_NAO_INFORMADA")}
     const [mmr,matches]=await Promise.all([
-      getJSON(`/v2/mmr/${PLAYER.region}/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}`,key),
+      getJSON(`/v3/mmr/${PLAYER.region}/pc/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}`,key),
       getJSON(`/v3/matches/${PLAYER.region}/${encodeURIComponent(PLAYER.name)}/${encodeURIComponent(PLAYER.tag)}?mode=competitive&size=10`,key)
     ]);
     renderRank(mmr);renderMatches(Array.isArray(matches)?matches:[]);
