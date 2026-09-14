@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b0c12">
+  <meta name="description" content="Painel pessoal de desempenho no Valorant de Gavloski.">
+  <title>Gavloski // Valorant Tracker</title>
+  <link rel="preconnect" href="https://api.henrikdev.xyz">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">G</span><span>GAVLOSKI<span class="red">.GG</span></span></a>
+    <div class="live"><i></i><span id="syncLabel">CARREGANDO DADOS</span></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">PAINEL COMPETITIVO PESSOAL</p>
+        <h1>Gavloski <span>#Белла</span></h1>
+        <p class="subtitle">Acompanhe sua evolução, encontre padrões e mantenha o foco até o Radiante.</p>
+      </div>
+      <button id="refreshButton" class="refresh" type="button"><span>↻</span> Atualizar dados</button>
+    </section>
+
+    <section id="notice" class="notice hidden" aria-live="polite"></section>
+
+    <section class="rank-panel panel">
+      <div class="rank-emblem"><span id="rankInitial">—</span></div>
+      <div class="rank-info">
+        <p>RANK ATUAL</p>
+        <h2 id="rankName">Consultando...</h2>
+        <div class="rr-row"><strong id="rrValue">— RR</strong><span id="rankChange">Última atualização</span></div>
+        <div class="progress"><div id="rrBar"></div></div>
+      </div>
+      <div class="goal">
+        <span>META</span><strong>RADIANTE</strong><small>Solo queue • evolução sustentável</small>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat panel"><span>K/D</span><strong id="kd">—</strong><small id="kills">— eliminações</small></article>
+      <article class="stat panel"><span>ACS MÉDIO</span><strong id="acs">—</strong><small>pontuação de combate</small></article>
+      <article class="stat panel"><span>HEADSHOT</span><strong id="hs">—</strong><small id="headshots">— headshots</small></article>
+      <article class="stat panel"><span>WIN RATE</span><strong id="winRate">—</strong><small id="record">— partidas</small></article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel matches-card">
+        <div class="section-title"><div><p>DESEMPENHO RECENTE</p><h3>Últimas partidas</h3></div><span id="matchCount">0 jogos</span></div>
+        <div id="matches" class="matches"><div class="loading-row"></div><div class="loading-row"></div><div class="loading-row"></div></div>
+      </article>
+      <aside class="panel focus-card">
+        <div class="section-title"><div><p>ANÁLISE RÁPIDA</p><h3>Foco recomendado</h3></div></div>
+        <div class="focus-icon">◎</div>
+        <h4 id="focusTitle">Analisando partidas...</h4>
+        <p id="focusText">Assim que os dados chegarem, o painel indicará um ponto objetivo para seu próximo bloco de ranked.</p>
+        <div class="routine"><span>ROTINA LEVE</span><strong>30 min por dia</strong><small>Mecânica • decisões • consistência</small></div>
+      </aside>
+    </section>
+  </main>
+
+  <footer><span>Dados fornecidos por HenrikDev API</span><span>Feito para Gavloski • não afiliado à Riot Games</span></footer>
+  <script src="script.js"></script>
+</body>
+</html>
