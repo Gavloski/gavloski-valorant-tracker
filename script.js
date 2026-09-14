@@ -12,7 +12,7 @@ function getApiKey(){
   return key?.trim()||"";
 }
 async function getJSON(path,key){
-  const res=await fetch(API+path,{headers:{Accept:"application/json",Authorization:"Bearer "+key}});
+  const res=await fetch(API+path,{headers:{Accept:"application/json",Authorization:key}});
   if(res.status===401||res.status===403){
     localStorage.removeItem("henrik_api_key");
     throw new Error("API_KEY_INVALIDA");
