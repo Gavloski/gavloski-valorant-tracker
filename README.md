@@ -1,6 +1,6 @@
 # Gavloski Valorant Tracker
 
-Painel pessoal e responsivo para acompanhar as partidas competitivas de **Gavloski#Белла**.
+Painel pessoal e responsivo para acompanhar as partidas competitivas de **GAVLOSKI#片想い**.
 
 ## Recursos
 
