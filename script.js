@@ -1,4 +1,4 @@
-const PLAYER={name:"Gavloski",tag:"Белла",region:"br"};
+const PLAYER={name:"GAVLOSKI",tag:"片想い",region:"br"};
 const API="https://api.henrikdev.xyz/valorant";
 const $=id=>document.getElementById(id);
 const safe=n=>Number.isFinite(n)?n:0;
@@ -91,7 +91,7 @@ async function load(){
     }else if(err.message==="CHAVE_NAO_INFORMADA"){
       $("notice").textContent="É necessário informar uma chave gratuita da HenrikDev. Clique em “Atualizar dados” para inserir.";
     }else{
-      $("notice").textContent=err.message+" Confirme também que a Riot ID é Gavloski#Белла.";
+      $("notice").textContent=err.message+" Confirme também que a Riot ID é GAVLOSKI#片想い.";
     }
     $("notice").classList.remove("hidden");$("syncLabel").textContent="CONFIGURAÇÃO NECESSÁRIA";
     $("matches").innerHTML='<p class="subtitle">Clique em “Atualizar dados” para tentar novamente.</p>';
