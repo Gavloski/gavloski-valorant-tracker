@@ -3,6 +3,7 @@ let PLAYER={...HOME_PLAYER};
 const API="https://api.henrikdev.xyz/valorant";
 const $=id=>document.getElementById(id);
 const safe=n=>Number.isFinite(n)?n:0;
+let CURRENT_MATCHES=[];
 
 function getApiKey(){return localStorage.getItem("henrik_api_key")?.trim()||""}
 function openApiModal(){
@@ -46,7 +47,8 @@ function renderRank(mmr){
   $("rrBar").style.width=Math.max(0,Math.min(100,rr))+"%";
 }
 function renderMatches(matches){
-  const rows=matches.map(m=>({match:m,me:findMe(m)})).filter(x=>x.me);
+  const rows=matches.slice(0,10).map(m=>({match:m,me:findMe(m)})).filter(x=>x.me);
+  CURRENT_MATCHES=rows;
   let kills=0,deaths=0,shots=0,heads=0,score=0,wins=0,rounds=0;
   rows.forEach(({match:m,me:p})=>{
     kills+=safe(p.stats?.kills); deaths+=safe(p.stats?.deaths); score+=safe(p.stats?.score);
@@ -62,18 +64,73 @@ function renderMatches(matches){
   $("winRate").textContent=rows.length?Math.round(wins/rows.length*100)+"%":"—";
   $("record").textContent=wins+"V • "+(rows.length-wins)+"D";
   $("matchCount").textContent=rows.length+" jogos";
-  $("matches").innerHTML=rows.slice(0,6).map(({match:m,me:p})=>{
+  $("matches").innerHTML=rows.slice(0,10).map(({match:m,me:p},index)=>{
     const red=p.team?.toLowerCase()==="red",a=red?m.teams.red:m.teams.blue,b=red?m.teams.blue:m.teams.red,won=safe(a?.rounds_won)>safe(b?.rounds_won);
     const kd=safe(p.stats?.deaths)?(safe(p.stats.kills)/safe(p.stats.deaths)).toFixed(2):safe(p.stats?.kills).toFixed(2);
     const date=m.metadata?.game_start_patched||m.metadata?.game_start||"Partida recente";
-    return `<div class="match"><div class="agent">${(p.character||"?").slice(0,2).toUpperCase()}</div><div class="match-main"><strong>${p.character||"Agente"} • ${safe(p.stats?.kills)}/${safe(p.stats?.deaths)}/${safe(p.stats?.assists)}</strong><small>${m.metadata?.map||"Mapa"} • K/D ${kd} • ${date}</small></div><div class="score">${safe(a?.rounds_won)} : ${safe(b?.rounds_won)}</div><div class="result ${won?"win":"loss"}">${won?"VITÓRIA":"DERROTA"}</div></div>`;
+    return `<div class="match" data-match-index="${index}" tabindex="0" role="button" aria-label="Ver detalhes da partida em ${m.metadata?.map||"mapa"}"><div class="agent">${(p.character||"?").slice(0,2).toUpperCase()}</div><div class="match-main"><strong>${p.character||"Agente"} • ${safe(p.stats?.kills)}/${safe(p.stats?.deaths)}/${safe(p.stats?.assists)}</strong><small>${m.metadata?.map||"Mapa"} • K/D ${kd} • ${date}</small></div><div class="score">${safe(a?.rounds_won)} : ${safe(b?.rounds_won)}</div><div class="result ${won?"win":"loss"}">${won?"VITÓRIA":"DERROTA"}</div></div>`;
   }).join("")||'<p class="subtitle">Nenhuma partida competitiva recente encontrada.</p>';
+  document.querySelectorAll("[data-match-index]").forEach(row=>{
+    row.addEventListener("click",()=>openMatchDetail(Number(row.dataset.matchIndex)));
+    row.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openMatchDetail(Number(row.dataset.matchIndex))}});
+  });
   const kd=deaths?kills/deaths:kills,wr=rows.length?wins/rows.length:0,hs=shots?heads/shots:0;
   if(kd<1){$("focusTitle").textContent="Preserve mais suas vidas";$("focusText").textContent="Seu K/D recente indica que sobreviver e buscar trocas favoráveis deve ser a prioridade. Evite reabrir ângulos sem utilidade ou apoio."}
   else if(hs<.2){$("focusTitle").textContent="Altura de mira e primeiro tiro";$("focusText").textContent="Seu impacto está bom, mas há espaço para converter mais duelos com crosshair placement e pequenas pausas antes do disparo."}
   else if(wr<.5){$("focusTitle").textContent="Converta vantagem em rounds";$("focusText").textContent="Os números individuais não parecem ser o maior limite. Foque comunicação curta, disciplina no pós-plant e decisões com vantagem numérica."}
   else{$("focusTitle").textContent="Mantenha a consistência";$("focusText").textContent="A sequência recente está positiva. Preserve a rotina, limite sessões após duas derrotas seguidas e repita as decisões que geram vantagem."}
 }
+
+function fmtDuration(value){
+  const seconds=value>100000?Math.round(value/1000):Math.round(value||0);
+  return Math.floor(seconds/60)+"m "+String(seconds%60).padStart(2,"0")+"s";
+}
+function playerMetrics(player,totalRounds){
+  const stats=player.stats||{},shots=safe(stats.headshots)+safe(stats.bodyshots)+safe(stats.legshots);
+  return {
+    kills:safe(stats.kills),deaths:safe(stats.deaths),assists:safe(stats.assists),
+    acs:totalRounds?Math.round(safe(stats.score)/totalRounds):0,
+    adr:totalRounds?Math.round(safe(player.damage_made)/totalRounds):0,
+    hs:shots?Math.round(safe(stats.headshots)/shots*100):0
+  };
+}
+function openMatchDetail(index){
+  const item=CURRENT_MATCHES[index];if(!item)return;
+  const m=item.match,p=item.me,red=p.team?.toLowerCase()==="red";
+  const own=red?m.teams?.red:m.teams?.blue,enemy=red?m.teams?.blue:m.teams?.red;
+  const won=safe(own?.rounds_won)>safe(enemy?.rounds_won);
+  const totalRounds=safe(m.teams?.red?.rounds_won)+safe(m.teams?.blue?.rounds_won);
+  const pm=playerMetrics(p,totalRounds);
+  const all=[...(m.players?.all_players||[])].sort((a,b)=>safe(b.stats?.score)-safe(a.stats?.score));
+  const teams=["Red","Blue"];
+  const scoreboard=teams.map(team=>{
+    const players=all.filter(x=>x.team?.toLowerCase()===team.toLowerCase());
+    if(!players.length)return "";
+    return `<tr class="team-divider"><td colspan="7">TIME ${team==="Red"?"VERMELHO":"AZUL"}</td></tr>`+players.map(x=>{
+      const v=playerMetrics(x,totalRounds),isMe=x.name?.toLowerCase()===PLAYER.name.toLowerCase()&&x.tag===PLAYER.tag;
+      return `<tr class="${isMe?"me-row":""}"><td class="player-cell"><strong>${x.name||"Jogador"}#${x.tag||""}</strong><small>${x.character||"Agente"}</small></td><td>${v.kills}</td><td>${v.deaths}</td><td>${v.assists}</td><td>${v.acs}</td><td>${v.adr}</td><td>${v.hs}%</td></tr>`;
+    }).join("");
+  }).join("");
+  const date=m.metadata?.game_start_patched||m.metadata?.game_start||"Data indisponível";
+  $("matchDetailContent").innerHTML=`
+    <span class="detail-kicker">DETALHES DA PARTIDA</span>
+    <div class="detail-header"><div><h2 id="matchDetailTitle">${m.metadata?.map||"Mapa"} · ${p.character||"Agente"}</h2><p>${date} · ${m.metadata?.mode||"Competitivo"} · ${fmtDuration(m.metadata?.game_length)}</p></div>
+    <div class="detail-result"><strong>${safe(own?.rounds_won)} : ${safe(enemy?.rounds_won)}</strong><span class="${won?"win-text":"loss-text"}">${won?"VITÓRIA":"DERROTA"}</span></div></div>
+    <div class="detail-stats">
+      <div class="detail-stat"><span>ABATES</span><strong>${pm.kills}</strong></div>
+      <div class="detail-stat"><span>MORTES</span><strong>${pm.deaths}</strong></div>
+      <div class="detail-stat"><span>ASSIST.</span><strong>${pm.assists}</strong></div>
+      <div class="detail-stat"><span>ACS</span><strong>${pm.acs}</strong></div>
+      <div class="detail-stat"><span>ADR</span><strong>${pm.adr}</strong></div>
+      <div class="detail-stat"><span>HEADSHOT</span><strong>${pm.hs}%</strong></div>
+    </div>
+    <h3 class="scoreboard-title">Placar de jogadores</h3>
+    <div style="overflow-x:auto"><table class="scoreboard"><thead><tr><th>JOGADOR</th><th>K</th><th>D</th><th>A</th><th>ACS</th><th>ADR</th><th>HS%</th></tr></thead><tbody>${scoreboard}</tbody></table></div>
+    <p class="detail-hint">Os cálculos consideram os rounds disputados nesta partida.</p>`;
+  $("matchModal").classList.remove("hidden");
+}
+function closeMatchDetail(){$("matchModal").classList.add("hidden")}
+
 function updatePlayerHeader(){
   $("playerName").textContent=PLAYER.name;
   $("playerTag").textContent="#"+PLAYER.tag;
@@ -134,6 +191,9 @@ async function load(){
   }finally{$("refreshButton").disabled=false}
 }
 $("refreshButton").addEventListener("click",load);
+$("closeMatchModal").addEventListener("click",closeMatchDetail);
+$("matchModal").addEventListener("click",event=>{if(event.target===$("matchModal"))closeMatchDetail()});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")closeMatchDetail()});
 $("playerSearchForm").addEventListener("submit",searchPlayer);
 $("myProfileButton").addEventListener("click",()=>{PLAYER={...HOME_PLAYER};updatePlayerHeader();resetDashboard();load()});
 updatePlayerHeader();
